@@ -16,19 +16,10 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
     const lastScanTime = useRef<number>(0);
     const isThrottled = useRef<boolean>(false);
 
-    const handleBackButton = useCallback(() => {
+    const handleClose = useCallback(() => {
         // 뒤로가기 버튼 클릭 시 카메라를 종료하지 않고 모달만 닫기
         onClose();
     }, [onClose]);
-
-    const handleClose = useCallback(() => {
-        // X 버튼이나 에러 발생 시 카메라 완전 종료
-        if (scanner) {
-            scanner.stop();
-            scanner.destroy();
-        }
-        onClose();
-    }, [scanner, onClose]);
 
     const handleQRResult = useCallback(async (uuid: string) => {
         const currentTime = Date.now();
@@ -78,30 +69,26 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
             const success = await PostMemberActivities(parseInt(storedActivityId), qrResult.data.memberId);
             if (success) {
                 alert(`${qrResult.data.name}님이 참석했습니다.`);
-                setIsProcessing(false);
-                // 성공 후 2초 후에 다시 스캔 가능하도록 설정
+                // 성공 후 다시 스캔 가능하도록 설정
                 setTimeout(() => {
+                    setIsProcessing(false);
                     isThrottled.current = false;
                     lastProcessedQR.current = '';
                     lastScanTime.current = 0;
                 }, 1000);
             } else {
-                setError('활동 참여 등록에 실패했습니다.');
+                alert('활동 참여 등록에 실패했습니다. 다시 시도해주세요.');
                 setIsProcessing(false);
                 isThrottled.current = false;
             }
 
         } catch (error) {
             console.error('QR 코드 처리 중 오류 발생:', error);
-            alert('QR 코드 처리 중 오류가 발생했습니다.');
+            alert('QR 코드 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+            setIsProcessing(false);
             isThrottled.current = false;
-            if (scanner) {
-                scanner.stop();
-                scanner.destroy();
-            }
-            onClose();
         }
-    }, []);
+    }, [scanner, onClose]);
 
     useEffect(() => {
         if (!videoRef.current) return;
@@ -152,21 +139,21 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
                 </div>
 
                 {error ? (
-                    <div className="text-red-500 text-center font-size-18px py-4">{error}</div>
+                    <div className="text-red-500 text-center font-weight-600 font-size-16px py-4">{error}</div>
                 ) : (
                     <div className="relative">
                         <video
                             ref={videoRef}
-                            className="w-full h-96 bg-gray-30 rounded-[10px]"
+                            className="w-full h-full bg-gray-30 rounded-[10px]"
                         />
                         <div className="text-center mt-2 font-weight-500 font-size-16px color-gray-90">
-                            {isProcessing ? '처리 중...' : 'QR 코드를 카메라에 비춰주세요!'}
+                            {isProcessing ? '처리 중...' : 'QR 코드를 카메라에 비춰주세요! 📷✨'}
                         </div>
                     </div>
                 )}
                 <div className="flex justify-center mt-4">
                     <button
-                        onClick={handleBackButton}
+                        onClick={handleClose}
                         className="px-4 py-2 bg-gray-30 text-black rounded-[10px] cursor-pointer hover:bg-gray-90"
                     >
                         뒤로가기

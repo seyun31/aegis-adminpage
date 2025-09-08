@@ -12,7 +12,7 @@ export async function PostMemberActivities(activityId: number, memberId: number)
       memberId
     };
     
-    const res = await fetch(`${API_BASE_URL}/admin/acitivity-participation`, {
+    const res = await fetch(`${API_BASE_URL}/admin/activity-participation`, {
       method: 'POST',
       credentials: 'include',
       headers: {
