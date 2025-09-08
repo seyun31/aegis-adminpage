@@ -5,7 +5,7 @@ const Header: React.FC = () => {
         <>
             <div className="flex justify-center items-center w-full h-[85px]">
                 <div className="flex justify-left items-center w-full h-[85px] bg-white">
-                    <img className="w-[35px] h-[35px] ml-6" src="../src/assets/logos/aegis.svg" alt="Aegis Logo" />
+                    <img className="w-[35px] h-[35px] ml-6" src="/src/assets/logos/aegis.svg" alt="Aegis Logo" />
                     <p className="ml-4 font-size-20px font-weight-600 color-black">Aegis</p>
                 </div>
                 <div className="flex justify-center w-full h-[85px] bg-white"/>
