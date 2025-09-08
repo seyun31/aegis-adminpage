@@ -1,7 +1,11 @@
+import SearchBar from "../components/searchBar";
+
 const Event: React.FC = () => {
     return(
         <>
-            <h1>행사 페이지</h1>
+            <div className="flex flex-col justify-center items-center">
+                <SearchBar/>
+            </div>
         </>
     )
 }
