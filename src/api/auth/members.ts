@@ -2,7 +2,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function Members(): Promise<boolean> {
   try {
-    console.log("API 요청 시작:", `${API_BASE_URL}/members`);
     const res = await fetch(`${API_BASE_URL}/members`, {
       method: 'GET',
       credentials: 'include',
@@ -10,8 +9,6 @@ export async function Members(): Promise<boolean> {
         accept: 'application/json',
       },
     });
-
-    // console.log("응답 상태:", res.status, res.statusText);
     
     if (!res.ok) {
       console.log("응답이 실패했습니다:", res.status);

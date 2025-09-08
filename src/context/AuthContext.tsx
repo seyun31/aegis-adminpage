@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Members } from '../api/members';
+import { Members } from '../api/auth/members';
 
 interface AuthContextType {
   isAuthenticated: boolean | null; // null = loading, true = authenticated, false = not authenticated
