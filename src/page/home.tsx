@@ -1,31 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Header from "../components/Header";
-import { Members } from '../api/members';
+import { useAuthGuard } from '../hooks/useAuthGuard';
 
 const Home: React.FC = () => {
-    const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const authenticated = await Members();
-                if (authenticated) {
-                    setIsAuthenticated(true);
-                } else {
-                    navigate('/login');
-                }
-            } catch (error) {
-                console.error('인증 확인 실패:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        checkAuth();
-    }, [navigate]);
+    const { isLoading, isAuthenticated } = useAuthGuard();
 
     if (isLoading) {
         return (
