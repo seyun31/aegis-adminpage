@@ -3,14 +3,14 @@ import EventTable from "../components/EventTable";
 import Header from "../components/Header";
 import SearchBar from "../components/Search";
 import { useAuthGuard } from '../hooks/useAuthGuard';
-import { GetActivities } from '../api/activity/get-activities';
-import type { Activity } from '../api/activity/get-activities';
+import { GetActivities, type Activity } from '../api/activity/get-activities';
 
 const Event: React.FC = () => {
     const { isLoading, isAuthenticated } = useAuthGuard();
     const [activities, setActivities] = useState<Activity[]>([]);
 
     useEffect(() => {
+        // 활동 목록 전체 조회
         const fetchActivities = async () => {
             try {
                 const data = await GetActivities();
@@ -20,6 +20,7 @@ const Event: React.FC = () => {
             }
         };
 
+        // 권한 확인
         if (isAuthenticated) {
             fetchActivities();
         }

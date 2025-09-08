@@ -18,12 +18,7 @@ export async function Members(): Promise<boolean> {
     const data = await res.json();
 
     if (data.role === "ADMIN") {
-      // 처음 로그인 시에만 환영 메시지 표시
-      const Welcome = localStorage.getItem('Welcome');
-      if (!Welcome) {
-        alert(`안녕하세요 ${data.name} 관리자님!`);
-        localStorage.setItem('Welcome', 'true');
-      }
+      alert(`안녕하세요 ${data.name} 관리자님!`);
       return true;
     } else {
       alert("로그인 실패! 관리자만 접근 가능합니다.");

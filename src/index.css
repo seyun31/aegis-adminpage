@@ -37,6 +37,10 @@
   .font-size-20px {
     font-size: 20px;
   }
+
+  .font-size-18px {
+    font-size: 218px;
+  }
   
   .font-size-16px {
     font-size: 16px;
@@ -118,6 +122,27 @@
   }
 
   .bg-gray-20 {
+    background-color: var(--gray-20);
+  }
+
+  /* Hover Background Color Classes */
+  .hover\\:bg-gray-90:hover {
+    background-color: var(--gray-90);
+  }
+
+  .hover\\:bg-gray-60:hover {
+    background-color: var(--gray-60);
+  }
+
+  .hover\\:bg-gray-50:hover {
+    background-color: var(--gray-50);
+  }
+
+  .hover\\:bg-gray-30:hover {
+    background-color: var(--gray-30);
+  }
+
+  .hover\\:bg-gray-20:hover {
     background-color: var(--gray-20);
   }
 

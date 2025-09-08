@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import QRScannerComponent from './QRScanner';
 
 interface EventRow {
@@ -9,30 +9,30 @@ interface EventRow {
 
 interface EventTableProps {
     rows: EventRow[];
-    // onEdit: (id: number) => void;
-    // onDelete: (id: number) => void;
-    // onGoQR: (id: number) => void;
 }
 
 const EventTable: React.FC<EventTableProps> = ({ rows }) => {
     const [showQRScanner, setShowQRScanner] = useState(false);
-    const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-    // QR코드 카메라
-    const handleQRScan = (result: string) => {
-        console.log('QR 코드 스캔 결과:', result);
-        alert(`이벤트 ID ${selectedEventId}의 QR 코드 스캔 완료: ${result}`);
-        setShowQRScanner(false);
-        setSelectedEventId(null);
-    };
 
     const handleQRClose = () => {
+        // URL 파라미터에서 id 제거
+        const url = new URL(window.location.href);
+        url.searchParams.delete('id');
+        window.history.pushState({}, '', url);
+        
         setShowQRScanner(false);
-        setSelectedEventId(null);
     };
 
     const handleGoQR = (eventId: number) => {
-        setSelectedEventId(eventId);
+        // 로컬 저장소에 활동 ID 저장
+        localStorage.setItem('currentActivityId', eventId.toString());
+        
+        // URL 파라미터에 이벤트 ID 추가
+        const url = new URL(window.location.href);
+        url.searchParams.set('id', eventId.toString());
+        window.history.pushState({}, '', url);
+        
         setShowQRScanner(true);
     };
 
@@ -106,7 +106,6 @@ const EventTable: React.FC<EventTableProps> = ({ rows }) => {
         {/* QR Scanner Modal */}
         {showQRScanner && (
             <QRScannerComponent
-                onScan={handleQRScan}
                 onClose={handleQRClose}
             />
         )}
