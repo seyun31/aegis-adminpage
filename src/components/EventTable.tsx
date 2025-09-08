@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import QRScannerComponent from './QRScanner';
 
 interface EventRow {
     id: number;
@@ -14,6 +15,27 @@ interface EventTableProps {
 }
 
 const EventTable: React.FC<EventTableProps> = ({ rows }) => {
+    const [showQRScanner, setShowQRScanner] = useState(false);
+    const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+
+    // QR코드 카메라
+    const handleQRScan = (result: string) => {
+        console.log('QR 코드 스캔 결과:', result);
+        alert(`이벤트 ID ${selectedEventId}의 QR 코드 스캔 완료: ${result}`);
+        setShowQRScanner(false);
+        setSelectedEventId(null);
+    };
+
+    const handleQRClose = () => {
+        setShowQRScanner(false);
+        setSelectedEventId(null);
+    };
+
+    const handleGoQR = (eventId: number) => {
+        setSelectedEventId(eventId);
+        setShowQRScanner(true);
+    };
+
     return(
         <>
         {/* 버튼 section */}
@@ -69,7 +91,7 @@ const EventTable: React.FC<EventTableProps> = ({ rows }) => {
                         {/* QR */}
                         <div className="flex justify-center table-data">
                         <button
-                            onClick={() => ""}
+                            onClick={() => handleGoQR(r.id)}
                             className="h-8 px-3 rounded-[10px] bg-green-100 text-green-700 hover:bg-green-200"
                         >
                             이동하기
@@ -80,6 +102,14 @@ const EventTable: React.FC<EventTableProps> = ({ rows }) => {
                 </div>
             </section>
         </div>
+
+        {/* QR Scanner Modal */}
+        {showQRScanner && (
+            <QRScannerComponent
+                onScan={handleQRScan}
+                onClose={handleQRClose}
+            />
+        )}
         </>
     )
 
