@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from './page/Home';
-import Login from './page/Login';
-import Event from './page/Event';
-import NotFound from './page/NotFound';
+import Home from './page/home';
+import Login from './page/login';
+import Event from './page/event';
+import NotFound from './page/notfound';
 
 const App: React.FC = () => {
   return (

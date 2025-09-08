@@ -1,5 +1,5 @@
 import Header from "../components/Header";
-import SearchBar from "../components/searchBar";
+import SearchBar from "../components/Search";
 
 const Event: React.FC = () => {
     return(
