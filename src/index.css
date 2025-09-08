@@ -14,9 +14,11 @@
     --black: #000000;
 
     /* gray 컬러 팔레트 */
-     --gray-90: #767676;
+     --gray-90: #53575F;
+     --gray-60: #767676;
      --gray-50: #7A7A7A;
      --gray-30: #D9D9D9;
+     --gray-20: #E2E2E2;
 
   }
 
@@ -74,12 +76,49 @@
     color: var(--gray-90);
   }
 
+  .color-gray-60 {
+    color: var(--gray-60);
+  }
+
   .color-gray-50 {
     color: var(--gray-50);
   }
 
   .color-gray-30 {
     color: var(--gray-30);
+  }
+
+  .color-gray-20 {
+    color: var(--gray-20);
+  }
+
+   /* Background Color Classes */
+  .bg-black {
+    background-color: var(--black);
+  }
+
+  .bg-white {
+    background-color: var(--white);
+  }
+  
+  .bg-gray-90 {
+    background-color: var(--gray-90);
+  }
+
+  .bg-gray-60 {
+    background-color: var(--gray-60);
+  }
+
+  .bg-gray-50 {
+    background-color: var(--gray-50);
+  }
+
+  .bg-gray-30 {
+    background-color: var(--gray-30);
+  }
+
+  .bg-gray-20 {
+    background-color: var(--gray-20);
   }
 
   /* Border Color Classes */
@@ -120,6 +159,18 @@
     font-size: 20px;
     font-weight: 600;
     color: var(--gray-30);
+  }
+
+  .table-header {
+    font-size: 20px;
+    font-weight: 600;
+    color: black;
+  }
+
+  .table-data {
+    font-size: 18px;
+    font-weight: 500;
+    color: black;
   }
 }
 
