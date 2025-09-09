@@ -45,12 +45,22 @@ const Event: React.FC = () => {
         amount: activity.pointAmount
     }));
 
+    // 테이블 행 업데이트 함수
+    const updateTableRows = (newRows: Array<{id: number, name: string, amount: number}>) => {
+        const updatedActivities = newRows.map(row => ({
+            activityId: row.id,
+            name: row.name,
+            pointAmount: row.amount
+        }));
+        setActivities(updatedActivities);
+    };
+
     return(
         <>  <Header />
             <div className="flex flex-col min-h-screen w-full mt-20 px-8">
                 <div className="flex flex-col gap-6">
                     <SearchBar/>
-                        <EventTable rows={tableRows} />
+                        <EventTable rows={tableRows} setRows={updateTableRows} />
                 </div>
             </div>
         </>

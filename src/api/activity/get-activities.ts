@@ -22,8 +22,6 @@ export async function GetActivities(): Promise<Activity[]> {
     }
 
     const data: Activity[] = await res.json();
-    console.log("받아온 활동 목록:", data);
-    
     return data;
   } catch (err) {
     console.error("활동 목록 조회 실패:", err);

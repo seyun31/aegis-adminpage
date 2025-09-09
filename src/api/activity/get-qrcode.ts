@@ -22,7 +22,6 @@ export async function GetQRCode(uuid: string): Promise<{ success: boolean; data:
     }
 
     const data: MemberInfo = await res.json();
-    console.log("받아온 멤버 정보:", data);
     return { success: true, data };
   } catch (err) {
     console.error("QR 코드 멤버 정보 조회 실패:", err);
