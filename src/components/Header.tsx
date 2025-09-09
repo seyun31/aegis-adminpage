@@ -1,11 +1,19 @@
 import { IoLogOutOutline } from "react-icons/io5";
 import AegisLogo from '../assets/logos/aegis.svg';
+import { useNavigate } from "react-router-dom";
 
 const Header: React.FC = () => {
+    const navigate = useNavigate();
+
+    const onClick = () => {
+        navigate("/");
+    }
+
     return(
         <>
             <div className="flex justify-center items-center w-full h-[85px]">
-                <div className="flex justify-left items-center w-full h-[85px] bg-white">
+                <div className="flex justify-left items-center w-full h-[85px] bg-white"
+                     onClick={onClick}>
                     <img className="w-[35px] h-[35px] ml-6" src={AegisLogo} alt="Aegis Logo" />
                     <p className="ml-4 font-size-20px font-weight-600 color-black">Aegis</p>
                 </div>
