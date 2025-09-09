@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import EventTable from "../components/EventTable";
 import Header from "../components/Header";
+import Sidebar from '../components/SideBar';
 import SearchBar from "../components/Search";
 import { useAuthGuard } from '../hooks/useAuthGuard';
 import { GetActivities, type Activity } from '../api/activity/get-activities';
@@ -56,11 +57,19 @@ const Event: React.FC = () => {
     };
 
     return(
-        <>  <Header />
-            <div className="flex flex-col min-h-screen w-full mt-20 px-8">
-                <div className="flex flex-col gap-6">
-                    <SearchBar/>
-                        <EventTable rows={tableRows} setRows={updateTableRows} />
+        <>
+            <Header />
+            <div className="flex min-h-screen pt-[85px]">
+                <Sidebar />
+                <div className="flex-1 flex flex-col items-center justify-center py-6 px-8 ml-60">
+                    <div className="flex flex-col gap-6 w-full max-w-none">
+                        <div className="flex justify-center">
+                            <SearchBar/>
+                        </div>
+                        <div className="flex justify-center">
+                            <EventTable rows={tableRows} setRows={updateTableRows} />
+                        </div>
+                    </div>
                 </div>
             </div>
         </>
