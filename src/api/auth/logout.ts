@@ -32,7 +32,7 @@ export async function logout(): Promise<boolean> {
     deleteAllCookies();
     
     // 세션 스토리지와 로컬 스토리지도 정리
-    sessionStorage.clear();
+    sessionStorage.clear(); // 환영 메시지 플래그도 함께 삭제됨
     localStorage.removeItem('currentActivityId'); // 기존에 사용된 로컬스토리지 항목만 삭제
     
     console.log("로그아웃 완료 - 모든 쿠키와 세션 정보가 삭제되었습니다.");
