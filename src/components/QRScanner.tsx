@@ -77,7 +77,6 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
                     lastScanTime.current = 0;
                 }, 1000);
             } else {
-                alert('활동 참여 등록에 실패했습니다. 다시 시도해주세요.');
                 setIsProcessing(false);
                 isThrottled.current = false;
             }
@@ -132,7 +131,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
                     <h3 className="font-size-20px font-weight-700 color-black">QR 코드 스캔</h3>
                     <button
                         onClick={handleClose}
-                        className="color-gray-90 hover:color-black"
+                        className="color-gray-90 cursor-pointer hover:color-black"
                     >
                         ✕
                     </button>

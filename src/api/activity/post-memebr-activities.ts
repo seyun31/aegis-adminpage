@@ -24,8 +24,20 @@ export async function PostMemberActivities(activityId: number, memberId: number)
 
     
     if (!res.ok) {
-      console.log("응답이 실패했습니다:", res.status);
-      return false;
+      switch (res.status) {
+      case 400:
+        alert("잘못된 요청입니다. 입력 데이터를 확인해주세요.");
+        break;
+      case 404:
+        alert("해당 활동 또는 회원을 찾을 수 없습니다.");
+        break;
+      case 409:
+        alert("이미 참여한 활동입니다.");
+        break;
+      default:
+        alert("요청 처리 중 오류가 발생했습니다.");
+        break;
+      }
     }
 
     return true;
