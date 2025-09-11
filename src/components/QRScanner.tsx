@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import QrScanner from 'qr-scanner';
+import { showSuccess, showError } from '../utils/alert';
 import { GetQRCode } from '../api/activity/get-qrcode';
 import { PostMemberActivities } from '../api/activity/post-memebr-activities';
 
@@ -10,7 +11,6 @@ interface QRScannerProps {
 const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [scanner, setScanner] = useState<QrScanner | null>(null);
-    const [error, setError] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const lastProcessedQR = useRef<string>('');
     const lastScanTime = useRef<number>(0);
@@ -40,13 +40,13 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
         lastProcessedQR.current = uuid;
         lastScanTime.current = currentTime;
         setIsProcessing(true);
-        setError('');
+        // setError('');
         
         try {
             // 로컬 저장소에서 활동 ID 가져오기
             const storedActivityId = localStorage.getItem('currentActivityId');
             if (!storedActivityId) {
-                setError('활동 ID를 찾을 수 없습니다.');
+                showError('활동 ID를 찾을 수 없습니다.');
                 setIsProcessing(false);
                 isThrottled.current = false;
                 return;
@@ -55,20 +55,16 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
             // QR 코드 UUID로 멤버 정보 조회
             const qrResult = await GetQRCode(uuid);
             if (!qrResult.success || !qrResult.data) {
-                alert(qrResult.error || 'QR 코드를 통한 멤버 정보 조회에 실패했습니다.');
+                showError('QR 코드를 새로고침 후 다시 시도하세요.');
+                setIsProcessing(false);
                 isThrottled.current = false;
-                if (scanner) {
-                    scanner.stop();
-                    scanner.destroy();
-                }
-                onClose();
                 return;
             }
 
             // 멤버 활동 참여 등록
             const success = await PostMemberActivities(parseInt(storedActivityId), qrResult.data.memberId);
             if (success) {
-                alert(`${qrResult.data.name}님이 참석했습니다.`);
+                showSuccess(`${qrResult.data.name}님이 참석했습니다.`);
                 // 성공 후 다시 스캔 가능하도록 설정
                 setTimeout(() => {
                     setIsProcessing(false);
@@ -83,7 +79,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
 
         } catch (error) {
             console.error('QR 코드 처리 중 오류 발생:', error);
-            alert('QR 코드 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+            showError('QR 코드 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
             setIsProcessing(false);
             isThrottled.current = false;
         }
@@ -112,7 +108,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
         qrScanner.start().catch((err) => {
             console.error('QR Scanner Error:', err);
             if (isActive) {
-                setError('카메라에 접근할 수 없습니다. 카메라 권한을 확인해주세요.');
+                showError('카메라에 접근할 수 없습니다. 카메라 권한을 확인해주세요.');
             }
         });
 
@@ -137,9 +133,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
                     </button>
                 </div>
 
-                {error ? (
-                    <div className="text-red-500 text-center font-weight-600 font-size-16px py-4">{error}</div>
-                ) : (
+                {
                     <div className="relative">
                         <video
                             ref={videoRef}
@@ -149,7 +143,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
                             {isProcessing ? '처리 중...' : 'QR 코드를 카메라에 비춰주세요! 📷✨'}
                         </div>
                     </div>
-                )}
+                }
                 <div className="flex justify-center mt-4">
                     <button
                         onClick={handleClose}
