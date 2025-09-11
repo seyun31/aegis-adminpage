@@ -15,7 +15,7 @@ const Login: React.FC = () => {
                        placeholder="Enter ID"></input>
                 <input className="login-input login-input-placeholder w-[366px] h-[43px] rounded-[10px] bg-white border-[0.5px] border-gray-30 mb-6"
                        placeholder="Enter Password"></input> */}
-                <button className="font-size-12px font-weight-600 color-white w-[366px] h-[43px] rounded-[10px] bg-black"
+                <button className="font-size-12px font-weight-600 color-white w-[366px] h-[43px] rounded-[10px] bg-black cursor-pointer"
                         onClick={handleLogin}>관리자 인증</button>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import QrScanner from 'qr-scanner';
+import { showSuccess, showError } from '../utils/alert';
 import { GetQRCode } from '../api/activity/get-qrcode';
 import { PostMemberActivities } from '../api/activity/post-memebr-activities';
 
@@ -10,7 +11,6 @@ interface QRScannerProps {
 const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [scanner, setScanner] = useState<QrScanner | null>(null);
-    const [error, setError] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const lastProcessedQR = useRef<string>('');
     const lastScanTime = useRef<number>(0);
@@ -21,73 +21,106 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
         onClose();
     }, [onClose]);
 
-    const handleQRResult = useCallback(async (uuid: string) => {
-        const currentTime = Date.now();
-        
-        // 이미 처리 중이거나 throttling 중이면 무시
-        if (isProcessing || isThrottled.current) {
-            return;
-        }
-        
-        // 같은 QR 코드거나 1초 이내 요청이면 무시
-        if (lastProcessedQR.current === uuid || 
-            (currentTime - lastScanTime.current < 1000)) {
-            return;
-        }
-        
-        // throttling 활성화
-        isThrottled.current = true;
-        lastProcessedQR.current = uuid;
-        lastScanTime.current = currentTime;
-        setIsProcessing(true);
-        setError('');
-        
+
+    const handleRefreshCamera = useCallback(async () => {
         try {
-            // 로컬 저장소에서 활동 ID 가져오기
-            const storedActivityId = localStorage.getItem('currentActivityId');
-            if (!storedActivityId) {
-                setError('활동 ID를 찾을 수 없습니다.');
-                setIsProcessing(false);
-                isThrottled.current = false;
+            // 기존 스캐너 정리
+            if (scanner) {
+                await scanner.stop();
+                await scanner.start();
+                showSuccess("카메라가 새로고침 되었습니다!");
                 return;
             }
+            
+            // 잠시 대기 후 카메라 재시작
+            setTimeout(() => {
+                if (!videoRef.current) return;
 
-            // QR 코드 UUID로 멤버 정보 조회
-            const qrResult = await GetQRCode(uuid);
-            if (!qrResult.success || !qrResult.data) {
-                alert(qrResult.error || 'QR 코드를 통한 멤버 정보 조회에 실패했습니다.');
-                isThrottled.current = false;
-                if (scanner) {
-                    scanner.stop();
-                    scanner.destroy();
-                }
-                onClose();
-                return;
-            }
+                const qrScanner = new QrScanner(
+                    videoRef.current,
+                    async (result) => {
+                        const uuid = result.data;
+                        const currentTime = Date.now();
+                        
+                        // 이미 처리 중이거나 throttling 중이면 무시
+                        if (isProcessing || isThrottled.current) {
+                            return;
+                        }
+                        
+                        // 같은 QR 코드거나 1초 이내 요청이면 무시
+                        if (lastProcessedQR.current === uuid || 
+                            (currentTime - lastScanTime.current < 1000)) {
+                            return;
+                        }
+                        
+                        // throttling 활성화
+                        isThrottled.current = true;
+                        lastProcessedQR.current = uuid;
+                        lastScanTime.current = currentTime;
+                        setIsProcessing(true);
+                        
+                        try {
+                            // 로컬 저장소에서 활동 ID 가져오기
+                            const storedActivityId = localStorage.getItem('currentActivityId');
+                            if (!storedActivityId) {
+                                showError('활동 ID를 찾을 수 없습니다.');
+                                setIsProcessing(false);
+                                isThrottled.current = false;
+                                return;
+                            }
 
-            // 멤버 활동 참여 등록
-            const success = await PostMemberActivities(parseInt(storedActivityId), qrResult.data.memberId);
-            if (success) {
-                alert(`${qrResult.data.name}님이 참석했습니다.`);
-                // 성공 후 다시 스캔 가능하도록 설정
-                setTimeout(() => {
-                    setIsProcessing(false);
-                    isThrottled.current = false;
-                    lastProcessedQR.current = '';
-                    lastScanTime.current = 0;
-                }, 1000);
-            } else {
-                setIsProcessing(false);
-                isThrottled.current = false;
-            }
+                            // QR 코드 UUID로 멤버 정보 조회
+                            const qrResult = await GetQRCode(uuid);
+                            if (!qrResult.success || !qrResult.data) {
+                                showError('QR 코드를 새로고침 후 다시 시도하세요.');
+                                setIsProcessing(false);
+                                isThrottled.current = false;
+                                return;
+                            }
 
+                            // 멤버 활동 참여 등록
+                            const success = await PostMemberActivities(parseInt(storedActivityId), qrResult.data.memberId);
+                            if (success) {
+                                showSuccess(`${qrResult.data.name}님이 참석했습니다.`);
+                                // 성공 후 다시 스캔 가능하도록 설정
+                                setTimeout(() => {
+                                    setIsProcessing(false);
+                                    isThrottled.current = false;
+                                    lastProcessedQR.current = '';
+                                    lastScanTime.current = 0;
+                                }, 1000);
+                            } else {
+                                setIsProcessing(false);
+                                isThrottled.current = false;
+                            }
+
+                        } catch (error) {
+                            console.error('QR 코드 처리 중 오류 발생:', error);
+                            showError('QR 코드 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+                            setIsProcessing(false);
+                            isThrottled.current = false;
+                        }
+                    },
+                    {
+                        highlightScanRegion: true,
+                        highlightCodeOutline: true,
+                        preferredCamera: 'environment',
+                    }
+                );
+
+                setScanner(qrScanner);
+
+                qrScanner.start().catch((err) => {
+                    console.error('QR Scanner Refresh Error:', err);
+                    showError('카메라를 새로고침할 수 없습니다. 카메라 권한을 확인해주세요.');
+                });
+            }, 200);
+            
         } catch (error) {
-            console.error('QR 코드 처리 중 오류 발생:', error);
-            alert('QR 코드 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
-            setIsProcessing(false);
-            isThrottled.current = false;
+            console.error('Camera refresh error:', error);
+            showError('카메라 새로고침 중 오류가 발생했습니다.');
         }
-    }, [scanner, onClose]);
+    }, [scanner]);
 
     useEffect(() => {
         if (!videoRef.current) return;
@@ -95,9 +128,69 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
         let isActive = true;
         const qrScanner = new QrScanner(
             videoRef.current,
-            (result) => {
-                if (isActive) {
-                    handleQRResult(result.data);
+            async (result) => {
+                if (!isActive) return;
+                
+                const uuid = result.data;
+                const currentTime = Date.now();
+                
+                // 이미 처리 중이거나 throttling 중이면 무시
+                if (isProcessing || isThrottled.current) {
+                    return;
+                }
+                
+                // 같은 QR 코드거나 1초 이내 요청이면 무시
+                if (lastProcessedQR.current === uuid || 
+                    (currentTime - lastScanTime.current < 1000)) {
+                    return;
+                }
+                
+                // throttling 활성화
+                isThrottled.current = true;
+                lastProcessedQR.current = uuid;
+                lastScanTime.current = currentTime;
+                setIsProcessing(true);
+                
+                try {
+                    // 로컬 저장소에서 활동 ID 가져오기
+                    const storedActivityId = localStorage.getItem('currentActivityId');
+                    if (!storedActivityId) {
+                        showError('활동 ID를 찾을 수 없습니다.');
+                        setIsProcessing(false);
+                        isThrottled.current = false;
+                        return;
+                    }
+
+                    // QR 코드 UUID로 멤버 정보 조회
+                    const qrResult = await GetQRCode(uuid);
+                    if (!qrResult.success || !qrResult.data) {
+                        showError('QR 코드를 새로고침 후 다시 시도하세요.');
+                        setIsProcessing(false);
+                        isThrottled.current = false;
+                        return;
+                    }
+
+                    // 멤버 활동 참여 등록
+                    const success = await PostMemberActivities(parseInt(storedActivityId), qrResult.data.memberId);
+                    if (success) {
+                        showSuccess(`${qrResult.data.name}님이 참석했습니다.`);
+                        // 성공 후 다시 스캔 가능하도록 설정
+                        setTimeout(() => {
+                            setIsProcessing(false);
+                            isThrottled.current = false;
+                            lastProcessedQR.current = '';
+                            lastScanTime.current = 0;
+                        }, 1000);
+                    } else {
+                        setIsProcessing(false);
+                        isThrottled.current = false;
+                    }
+
+                } catch (error) {
+                    console.error('QR 코드 처리 중 오류 발생:', error);
+                    showError('QR 코드 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+                    setIsProcessing(false);
+                    isThrottled.current = false;
                 }
             },
             {
@@ -112,7 +205,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
         qrScanner.start().catch((err) => {
             console.error('QR Scanner Error:', err);
             if (isActive) {
-                setError('카메라에 접근할 수 없습니다. 카메라 권한을 확인해주세요.');
+                showError('카메라에 접근할 수 없습니다. 카메라 권한을 확인해주세요.');
             }
         });
 
@@ -120,7 +213,6 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
             isActive = false;
             qrScanner.stop();
             qrScanner.destroy();
-            setScanner(null);
         };
     }, []);
 
@@ -137,9 +229,7 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
                     </button>
                 </div>
 
-                {error ? (
-                    <div className="text-red-500 text-center font-weight-600 font-size-16px py-4">{error}</div>
-                ) : (
+                {
                     <div className="relative">
                         <video
                             ref={videoRef}
@@ -149,13 +239,13 @@ const QRScannerComponent: React.FC<QRScannerProps> = ({ onClose }) => {
                             {isProcessing ? '처리 중...' : 'QR 코드를 카메라에 비춰주세요! 📷✨'}
                         </div>
                     </div>
-                )}
+                }
                 <div className="flex justify-center mt-4">
                     <button
-                        onClick={handleClose}
-                        className="px-4 py-2 bg-gray-30 text-black rounded-[10px] cursor-pointer hover:bg-gray-90"
+                        onClick={handleRefreshCamera}
+                        className="px-4 py-2 bg-gray-30 text-black rounded-[10px] cursor-pointer"
                     >
-                        뒤로가기
+                        🔄 카메라 새로고침
                     </button>
                 </div>
             </div>

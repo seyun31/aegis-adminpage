@@ -2,6 +2,7 @@ import { IoLogOutOutline } from "react-icons/io5";
 import AegisLogo from '../assets/logos/aegis.svg';
 import { useNavigate } from "react-router-dom";
 import { logout } from '../api/auth/logout';
+import { showSuccess, showError, showCustomConfirm } from "../utils/alert";
 
 const Header: React.FC = () => {
     const navigate = useNavigate();
@@ -11,13 +12,14 @@ const Header: React.FC = () => {
     }
 
     const handleLogout = async () => {
-        if (confirm('로그아웃 하시겠습니까?')) {
+        const confirmed = await showCustomConfirm('로그아웃 하시겠습니까?');
+        if (confirmed) {
             const success = await logout();
             if (success) {
-                alert('로그아웃 되었습니다.');
+                showSuccess('로그아웃 되었습니다.');
                 window.location.href = '/login';
             } else {
-                alert('로그아웃 중 오류가 발생했습니다.');
+                showError('로그아웃 중 오류가 발생했습니다.');
             }
         }
     }

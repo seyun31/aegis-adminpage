@@ -35,7 +35,7 @@ export async function logout(): Promise<boolean> {
     sessionStorage.clear(); // 환영 메시지 플래그도 함께 삭제됨
     localStorage.removeItem('currentActivityId'); // 기존에 사용된 로컬스토리지 항목만 삭제
     
-    console.log("로그아웃 완료 - 모든 쿠키와 세션 정보가 삭제되었습니다.");
+    // console.log("로그아웃 완료 - 모든 쿠키와 세션 정보가 삭제되었습니다.");
     return true;
   } catch (err) {
     console.error("로그아웃 처리 실패:", err);
@@ -47,7 +47,7 @@ export async function logout(): Promise<boolean> {
 export function logoutWithSpecificCookie(cookieName: string): boolean {
   try {
     deleteCookie(cookieName);
-    console.log(`쿠키 '${cookieName}'이(가) 삭제되었습니다.`);
+    // console.log(`쿠키 '${cookieName}'이(가) 삭제되었습니다.`);
     return true;
   } catch (err) {
     console.error("쿠키 삭제 실패:", err);
