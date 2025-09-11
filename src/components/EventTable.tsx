@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import QRScannerComponent from './QRScanner';
+import { showError, showSuccess, showWarning } from '../utils/alert';
 import { getActivityById, updateActivity } from '../api/activity/put-activities';
 import { deleteActivity } from '../api/activity/delete-acitivites';
 import { GetActivities } from '../api/activity/get-activities';
@@ -26,7 +27,7 @@ const EventTable: React.FC<EventTableProps> = ({ rows, setRows }) => {
 
 
     const handleQRClose = () => {
-        // URL 파라미터에서 id 제거
+        // URL 파라미터에서 ID 제거
         const url = new URL(window.location.href);
         url.searchParams.delete('id');
         window.history.pushState({}, '', url);
@@ -68,19 +69,20 @@ const EventTable: React.FC<EventTableProps> = ({ rows, setRows }) => {
                 setShowEditModal(true);
             } else {
                 console.log('활동 정보를 찾을 수 없습니다.');
-                alert('활동 정보를 불러올 수 없습니다.');
+                showError('활동 정보를 불러올 수 없습니다.');
             }
         } catch (error) {
             console.error('수정 모달 열기 오류:', error);
-            alert('오류가 발생했습니다.');
+            showError('오류가 발생했습니다.');
         }
     };
 
     const handleDelete = async (activityId: number) => {
-        if (confirm('정말로 이 활동을 삭제하시겠습니까?')) {
+        const confirmed = await showWarning('정말로 이 활동을 삭제하시겠습니까?');
+        if (confirmed) {
             const success = await deleteActivity(activityId);
             if (success) {
-                alert('활동이 삭제되었습니다.');
+                showSuccess('활동이 삭제되었습니다.');
                 // 삭제 후 자동으로 정보 업데이트
                 const updatedActivities = await GetActivities();
                 const formattedRows = updatedActivities.map(activity => ({
@@ -90,7 +92,7 @@ const EventTable: React.FC<EventTableProps> = ({ rows, setRows }) => {
                 }));
                 setRows(formattedRows);
             } else {
-                alert('삭제에 실패했습니다.');
+                showError('삭제에 실패했습니다.');
             }
         }
     };
@@ -111,13 +113,13 @@ const EventTable: React.FC<EventTableProps> = ({ rows, setRows }) => {
         e.preventDefault();
         
         if (!eventName.trim()) {
-            alert('행사 이름을 입력하세요.');
+            showError('행사 이름을 입력하세요.');
             return;
         }
 
         const pointValue = parseInt(pointAmount, 10);
         if (isNaN(pointValue)) {
-            alert('올바른 포인트 값을 입력하세요.');
+            showError('올바른 포인트 값을 입력하세요.');
             return;
         }
 
@@ -125,7 +127,7 @@ const EventTable: React.FC<EventTableProps> = ({ rows, setRows }) => {
             // 수정 모드
             const success = await updateActivity(editingActivityId, eventName.trim(), pointValue);
             if (success) {
-                alert('행사가 수정되었습니다.');
+                showSuccess('행사가 수정되었습니다.');
                 handleCloseModal();
                 // 수정 후 자동으로 정보 업데이트
                 const updatedActivities = await GetActivities();
@@ -136,13 +138,13 @@ const EventTable: React.FC<EventTableProps> = ({ rows, setRows }) => {
                 }));
                 setRows(formattedRows);
             } else {
-                alert('행사 수정에 실패했습니다.');
+                showError('행사 수정에 실패했습니다.');
             }
         } else {
             // 생성 모드
             const success = await PostMemberActivities(eventName.trim(), pointValue);
             if (success) {
-                alert('행사가 생성되었습니다.');
+                showSuccess('행사가 생성되었습니다.');
                 handleCloseModal();
                 // 생성 후 자동으로 정보 업데이트
                 const updatedActivities = await GetActivities();
@@ -153,7 +155,7 @@ const EventTable: React.FC<EventTableProps> = ({ rows, setRows }) => {
                 }));
                 setRows(formattedRows);
             } else {
-                alert('행사 생성에 실패했습니다.');
+                showError('행사 생성에 실패했습니다.');
             }
         }
     };
