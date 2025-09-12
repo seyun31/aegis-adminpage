@@ -30,7 +30,7 @@ const Event: React.FC = () => {
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen">
-                <div>인증 확인 중...</div>
+                <div></div>
             </div>
         );
     }
