@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { ToastContainer, Bounce } from 'react-toastify';
 import Home from './page/home';
 import Login from './page/login';
 import Event from './page/event';
@@ -13,6 +14,19 @@ const App: React.FC = () => {
         <Route path='/event' element={<Event />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
+      <ToastContainer
+        position="top-center"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+      />
     </>
   );
 };
